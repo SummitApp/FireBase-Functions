@@ -16,7 +16,7 @@ Add a new customer to `\user`
 
 `last_name`: Last name
 
-`date_of_birth`: Date of birth
+`dob`: Date of birth
 
 ##### return value: 
 
@@ -32,7 +32,7 @@ Authenticate a user by first name, last name, and date of birth
 
 `last_name`: Last name
 
-`date_of_birth`: Date of birth
+`dob`: Date of birth
 
 ##### return value: 
 
@@ -50,7 +50,7 @@ Return user id of an existing user
 
 `last_name`: Last name
 
-`date_of_birth`: Date of birth
+`dob`: Date of birth
 
 ##### return value: 
 

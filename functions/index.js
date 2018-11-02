@@ -2,6 +2,9 @@ const functions = require('firebase-functions');
 
 // Firebase database functionality
 const admin = require('firebase-admin');
+// We need to enable cors functionality
+const cors = require('cors')({origin: true});
+
 admin.initializeApp();
 
 /**************************/
@@ -28,33 +31,35 @@ exports.addUser = functions.https.onRequest((req, res) => {
 /**************************/
 
 exports.authUser = functions.https.onRequest((req, res) => {
-  const first_name = req.query.first_name;
-  const last_name = req.query.last_name;
-  const date_of_birth = req.query.dob;
+  cors(req, res, () => {
+    const first_name = req.query.first_name;
+    const last_name = req.query.last_name;
+    const date_of_birth = req.query.dob;
 
-  const query = admin.database().ref('user');
-  let userId = '';
+    const query = admin.database().ref('user');
+    let userId = '';
 
-  return query.once('value')
-    .then((snapshot) => {
-      // iterate through all the entries
-      snapshot.forEach(entry => {
-        if(entry.child('date_of_birth').val() === date_of_birth
-          &&
-          entry.child('first_name').val() === first_name
-          &&
-          entry.child('last_name').val() === last_name
-        ) {
-          return res.status(200).send({'id': entry.key});
-        }
+    return query.once('value')
+      .then((snapshot) => {
+        // iterate through all the entries
+        snapshot.forEach(entry => {
+          if(entry.child('date_of_birth').val() === date_of_birth
+            &&
+            entry.child('first_name').val() === first_name
+            &&
+            entry.child('last_name').val() === last_name
+          ) {
+            return res.status(200).send({'id': entry.key});
+          }
+        });
+
+        // return 422 if cannot find given user
+        return res.status(422).send({'message': 'Fail to auth given user'});
+      }).catch(error => {
+        // return 422 for any other reason
+        return res.status(422).send({'message': 'Fail to auth given user'});
       });
-
-      // return 422 if cannot find given user
-      return res.status(422).send({'message': 'Fail to auth given user'});
-    }).catch(error => {
-      // return 422 for any other reason
-      return res.status(422).send({'message': 'Fail to auth given user'});
-    });
+  });
 });
 
 /**************************/
@@ -62,33 +67,35 @@ exports.authUser = functions.https.onRequest((req, res) => {
 /**************************/
 
 exports.getUserId = functions.https.onRequest((req, res) => {
-  const first_name = req.query.first_name;
-  const last_name = req.query.last_name;
-  const date_of_birth = req.query.dob;
+  cors(req, res, () => {
+    const first_name = req.query.first_name;
+    const last_name = req.query.last_name;
+    const date_of_birth = req.query.dob;
 
-  const query = admin.database().ref('user');
-  let userId = '';
+    const query = admin.database().ref('user');
+    let userId = '';
 
-  return query.once('value')
-    .then(snapshot => {
-      // iterate through all the entries
-      snapshot.forEach((entry) => {
-        if(entry.child('date_of_birth').val() === date_of_birth
-          &&
-          entry.child('first_name').val() === first_name
-          &&
-          entry.child('last_name').val() === last_name
-        ) {
-          return res.status(200).send({'id': entry.key});
-        }
+    return query.once('value')
+      .then(snapshot => {
+        // iterate through all the entries
+        snapshot.forEach((entry) => {
+          if(entry.child('date_of_birth').val() === date_of_birth
+            &&
+            entry.child('first_name').val() === first_name
+            &&
+            entry.child('last_name').val() === last_name
+          ) {
+            return res.status(200).send({'id': entry.key});
+          }
+        });
+
+        // return 422 if cannot find given user
+        return res.status(422).send({'message': 'Fail to get user id'});
+      }).catch(error => {
+        // return 422 for any other reason
+        return res.status(422).send({'message': 'Fail to get user id'});
       });
-
-      // return 422 if cannot find given user
-      return res.status(422).send({'message': 'Fail to get user id'});
-    }).catch(error => {
-      // return 422 for any other reason
-      return res.status(422).send({'message': 'Fail to get user id'});
-    });
+  });
 });
 
 /**************************/
@@ -96,18 +103,20 @@ exports.getUserId = functions.https.onRequest((req, res) => {
 /**************************/
 
 exports.getUserInfo = functions.https.onRequest((req, res) => {
-  const userId = req.query.user_id;
+  cors(req, res, () => {
+    const userId = req.query.user_id;
 
-  const getUserInfo = admin.database().ref('user').child(userId);
-  getUserInfo.once('value')
-    .then(snapshot => {
-      // check whether user id exits
-      if(!snapshot.exists()) {
-        return res.status(422).send({'message': 'User id not found'});
-      }
-      return res.status(200).send(snapshot.toJSON());
-    }).catch(error => {
-      res.status(422).send({'message': 'Fail to get user info'});
-    });
+    const getUserInfo = admin.database().ref('user').child(userId);
+    getUserInfo.once('value')
+      .then(snapshot => {
+        // check whether user id exits
+        if(!snapshot.exists()) {
+          return res.status(422).send({'message': 'User id not found'});
+        }
+        return res.status(200).send(snapshot.toJSON());
+      }).catch(error => {
+        res.status(422).send({'message': 'Fail to get user info'});
+      });
+  });
 });
 
