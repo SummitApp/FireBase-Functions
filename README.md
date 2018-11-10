@@ -70,3 +70,15 @@ Retrieve user information by user id.
 
 200 upon successful requests with user information
 422 upon failed requests with `message: 'User id not found` when `user_id` does not exist
+
+### getAllUserNames
+
+#### params:
+
+N/A
+
+#### return value:
+
+200 upon successful requests with all user names
+
+422 upon failed requests with `message: 'Fail to get user info'`

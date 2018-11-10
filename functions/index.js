@@ -120,3 +120,25 @@ exports.getUserInfo = functions.https.onRequest((req, res) => {
   });
 });
 
+// fetch all user names from database
+exports.getAllUserNames = functions.https.onRequest((req, res) => {
+  cors(req, res, () => {
+    const allUsers = admin.database().ref('user');
+    allUsers.once('value')
+      .then(snapshot => {
+        const names = [];
+
+        snapshot.forEach((entry) => {
+          //get user info
+          const userInfo = entry.val();
+          //push fullname
+          names.push(userInfo.first_name + ' ' + userInfo.last_name);
+        });
+        // return all user names
+        return res.status(200).send(JSON.stringify(names));
+      }).catch(error => {
+        res.status(422).send({'message': 'Fail to get user info'});
+      });
+  });
+});
+
