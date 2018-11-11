@@ -63,10 +63,14 @@ exports.authUser = functions.https.onRequest((req, res) => {
       }
 
       // return 422 if cannot find given user
-      return res.status(422).send({'message': 'Fail to auth given user'});
+      return cors(req, res, () => {
+        res.status(422).send({'message': 'Fail to auth given user'});
+      });
     }).catch(error => {
       // return 422 for any other reason
-      return res.status(422).send({'message': 'Fail to auth given user'});
+      return cors(req, res, () => {
+        res.status(422).send({'message': 'Fail to auth given user'});
+      });
     });
 });
 
@@ -106,10 +110,14 @@ exports.getUserId = functions.https.onRequest((req, res) => {
       }
 
       // return 422 if cannot find given user
-      return res.status(422).send({'message': 'Fail to get user id'});
+      return cors(req, res, () => {
+        res.status(422).send({'message': 'Fail to get user id'});
+      });
     }).catch(error => {
       // return 422 for any other reasons
-      return res.status(422).send({'message': 'Fail to get user id'});
+      return cors(req, res, () => {
+        res.status(422).send({'message': 'Fail to get user id'});
+      });
     });
 });
 
@@ -125,7 +133,9 @@ exports.getUserInfo = functions.https.onRequest((req, res) => {
     .then(snapshot => {
       // check whether user id exits
       if(!snapshot.exists()) {
-        return res.status(422).send({'message': 'User id not found'});
+        return cors(req, res, () => {
+          res.status(422).send({'message': 'User id not found'});
+        });
       }
 
       // return all user informations
@@ -133,7 +143,9 @@ exports.getUserInfo = functions.https.onRequest((req, res) => {
         res.status(200).send(snapshot.toJSON());
       });
     }).catch(error => {
-      return res.status(422).send({'message': 'Fail to get user info'});
+      return cors(req, res, () => {
+        res.status(422).send({'message': 'Fail to get user info'});
+      });
     });
 });
 
@@ -157,7 +169,9 @@ exports.getAllUserNames = functions.https.onRequest((req, res) => {
         res.status(200).send(JSON.stringify(names));
       });
     }).catch(error => {
-      return res.status(422).send({'message': 'Fail to get user info'});
+      return cors(req, res, () => {
+        res.status(422).send({'message': 'Fail to get user info'});
+      });
     });
 });
 
