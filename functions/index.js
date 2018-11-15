@@ -180,7 +180,7 @@ exports.getAllUserNames = functions.https.onRequest((req, res) => {
 // ============ Medical Questionnaire Functions ===============
 
 /**************************/
-/*  setGeneralInformation */
+/*    setGeneralMedInfo   */
 /**************************/
 exports.setGeneralMedInfo = functions.https.onRequest((req, res) => {
   // return if method is not post
@@ -210,6 +210,54 @@ exports.setGeneralMedInfo = functions.https.onRequest((req, res) => {
       // set general info
       var updates = {};
       updates['mdeical_info/general'] = val;
+      userRoot.update(updates);
+
+      // promise always needs to return something
+      return null;
+    }).catch(error => {
+      // handle other errors
+      return cors(req, res, () => {
+       res.status(422).send('{message: Cannot set general medical info}');
+      });
+    });
+
+    // return success
+    return cors(req, res, () => {
+      res.status(200).send('{message: ok}');
+    });
+});
+
+/**************************/
+/*       setMedInfo       */
+/**************************/
+exports.setMedInfo = functions.https.onRequest((req, res) => {
+  // return if method is not post
+  if(req.method !== 'POST') {
+    return cors(req, res, () => {
+      res.status(422).send({'message': 'Not POST'});
+    });
+  }
+
+  // get user id and val
+  const userId = req.body.user_id;
+  const val = req.body.val;
+
+  // can user doc tree
+  const userRoot = admin.database().ref('user').child(userId);
+
+  userRoot.once('value')
+    .then((snapshot) => {
+      //check whether user exists
+      if(!snapshot.exists()) {
+        // return 422 for medical info
+        return cors(req, res, () => {
+          res.status(422).send('{message: user does not exist}');
+        });
+      }
+
+      // set general info
+      var updates = {};
+      updates['mdeical_info/medical'] = val;
       userRoot.update(updates);
 
       // promise always needs to return something

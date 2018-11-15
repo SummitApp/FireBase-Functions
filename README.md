@@ -18,7 +18,7 @@ Add a new customer to `\user`
 
 `dob`: Date of birth
 
-##### return value: 
+##### return value:
 
 200 upon successful requests with `ok`
 
@@ -34,7 +34,7 @@ Authenticate a user by first name, last name, and date of birth
 
 `dob`: Date of birth
 
-##### return value: 
+##### return value:
 
 200 upon successful requests with user id.
 
@@ -52,7 +52,7 @@ Return user id of an existing user
 
 `dob`: Date of birth
 
-##### return value: 
+##### return value:
 
 200 upon successful requests with user id.
 
@@ -96,8 +96,28 @@ N/A
 
 #### return value:
 
-200 upon successful requests with all user names
+200 upon successful requests
 
-422 upon unknown id with `message: 'Cannot set medical info'`
+422 upon unknown id with `message: 'unknown user'`
+
+422 upon failed requests with `message: 'Cannot set general medical info'`
+
+### setMedInfo
+
+#### POST data:
+
+```
+{
+  user_id: USER_ID,
+  val: COMMENT
+}
+```
+
+#### return value:
+
+200 upon successful requests
+
+422 upon unknown id with `message: 'unknown user'`
 
 422 upon failed requests with `message: 'Cannot set medical info'`
+
