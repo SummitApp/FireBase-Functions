@@ -120,4 +120,3 @@ N/A
 422 upon unknown id with `message: 'unknown user'`
 
 422 upon failed requests with `message: 'Cannot set medical info'`
-
