@@ -82,3 +82,22 @@ N/A
 200 upon successful requests with all user names
 
 422 upon failed requests with `message: 'Fail to get user info'`
+
+### setGeneralMedInfo
+
+#### POST data:
+
+```
+{
+  user_id: USER_ID,
+  val: COMMENT
+}
+```
+
+#### return value:
+
+200 upon successful requests with all user names
+
+422 upon unknown id with `message: 'Cannot set medical info'`
+
+422 upon failed requests with `message: 'Cannot set medical info'`
