@@ -275,3 +275,38 @@ exports.setMedInfo = functions.https.onRequest((req, res) => {
     });
 });
 
+// ============ Alert Functions ===============
+
+/**************************/
+/*      createAlert       */
+/**************************/
+exports.createAlert = functions.https.onRequest((req, res) => {
+   // return if method is not post
+  if(req.method !== 'POST') {
+    return cors(req, res, () => {
+      res.status(422).send({'message': 'Not POST'});
+    });
+  }
+
+  // get user id and val
+  const name = req.body.name;
+  const dates_effective = req.body.dates_effective;
+  const description= req.body.description;
+  const ttl = req.body.ttl;
+
+  const alertRoot = admin.database().ref('alert');
+  const alertId = alertRoot.push().key;
+
+  var updates = {};
+  updates[alertId + '/name'] = name;
+  updates[alertId + '/dates_effective'] = dates_effective;
+  updates[alertId + '/description'] = description;
+  updates[alertId + '/ttl'] = ttl;
+
+  alertRoot.update(updates);
+
+  return cors(req, res, () => {
+    res.status(200).send('{message: ok}');
+  });
+});
+
