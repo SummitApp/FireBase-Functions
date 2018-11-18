@@ -209,7 +209,7 @@ exports.setGeneralMedInfo = functions.https.onRequest((req, res) => {
 
       // set general info
       var updates = {};
-      updates['mdeical_info/general'] = val;
+      updates['medical_info/general'] = val;
       userRoot.update(updates);
 
       // promise always needs to return something
@@ -257,7 +257,7 @@ exports.setMedInfo = functions.https.onRequest((req, res) => {
 
       // set general info
       var updates = {};
-      updates['mdeical_info/medical'] = val;
+      updates['medical_info/medical'] = val;
       userRoot.update(updates);
 
       // promise always needs to return something
