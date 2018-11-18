@@ -130,8 +130,15 @@ exports.getUserId = functions.https.onRequest((req, res) => {
 exports.getUserInfo = functions.https.onRequest((req, res) => {
   const userId = req.query.user_id;
 
+  // Prevent injection
+  if(userId === '/') {
+    return cors(req, res, () => {
+      res.status(422).send({'message': 'User id not found'});
+    });
+  }
+
   const getUserInfo = admin.database().ref('user').child(userId);
-  getUserInfo.once('value')
+  return getUserInfo.once('value')
     .then(snapshot => {
       // check whether user id exits
       if(!snapshot.exists()) {
@@ -149,6 +156,7 @@ exports.getUserInfo = functions.https.onRequest((req, res) => {
         res.status(422).send({'message': 'Fail to get user info'});
       });
     });
+
 });
 
 // fetch all user names from database
