@@ -31,6 +31,53 @@ exports.addUser = functions.https.onRequest((req, res) => {
 });
 
 /**************************/
+/*        deleteUser       */
+/**************************/
+
+exports.deleteUser = functions.https.onRequest((req, res) => {
+  const first_name = req.query.first_name;
+  const last_name = req.query.last_name;
+  const date_of_birth = req.query.dob;
+
+  const query = admin.database().ref('user');
+
+  query.once('value')
+    .then((snapshot) => {
+      let userId;
+
+      // iterate through all the entries
+      snapshot.forEach(entry => {
+        if(entry.child('date_of_birth').val() === date_of_birth
+          &&
+          entry.child('first_name').val() === first_name
+          &&
+          entry.child('last_name').val() === last_name
+        ) {
+          userId = entry.key;
+        }
+      });
+
+      // delete user id if given user is found
+      if(userId) {
+        admin.database().ref('user').child(userId).remove();
+        return cors(req, res, () => {
+          res.status(200).send({'messgae': 'Remove user successfully'});
+        });
+      }
+
+      // return 422 if cannot find given user
+      return cors(req, res, () => {
+        res.status(422).send({'message': 'Fail to auth given user'});
+      });
+    }).catch(error => {
+      // return 422 for any other reason
+      return cors(req, res, () => {
+        res.status(422).send({'message': 'Fail to auth given user'});
+      });
+    });
+});
+
+/**************************/
 /*       authUser         */
 /**************************/
 
