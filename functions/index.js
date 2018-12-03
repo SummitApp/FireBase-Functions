@@ -251,7 +251,7 @@ exports.userCheckIn = functions.https.onRequest((req, res) => {
       if(!snapshot.exists()) {
         // return 422 for medical info
         return cors(req, res, () => {
-          res.status(422).send('{message: user does not exist}');
+          res.status(422).send('{message: "user does not exist"}');
         });
       }
 
@@ -259,7 +259,7 @@ exports.userCheckIn = functions.https.onRequest((req, res) => {
       // we need to make sure punch card is > 0
       if(punchCard !== undefined && punchCard <= 0) {
         return cors(req, res, () => {
-          res.status(422).send('{message: no punch card left}');
+          res.status(422).send('{message: "no punch card left"}');
         });
       }
 
@@ -279,7 +279,7 @@ exports.userCheckIn = functions.https.onRequest((req, res) => {
       userRoot.update(updates);
 
       return cors(req, res, () => {
-          res.status(200).send('{message: ok}');
+          res.status(200).send('{message: "ok"}');
       });
     }).catch(error => {
       return cors(req, res, () => {
@@ -364,7 +364,7 @@ exports.setMedInfo = functions.https.onRequest((req, res) => {
       if(!snapshot.exists()) {
         // return 422 for medical info
         return cors(req, res, () => {
-          res.status(422).send('{message: user does not exist}');
+          res.status(422).send('{message: "user does not exist"}');
         });
       }
 
@@ -378,13 +378,13 @@ exports.setMedInfo = functions.https.onRequest((req, res) => {
     }).catch(error => {
       // handle other errors
       return cors(req, res, () => {
-       res.status(422).send('{message: Cannot set medical info}');
+       res.status(422).send('{message: "Cannot set medical info"}');
       });
     });
 
     // return success
     return cors(req, res, () => {
-      res.status(200).send('{message: ok}');
+      res.status(200).send('{message: "ok"}');
     });
 });
 
@@ -419,7 +419,7 @@ exports.createAlert = functions.https.onRequest((req, res) => {
   alertRoot.update(updates);
 
   return cors(req, res, () => {
-    res.status(200).send('{message: ok}');
+    res.status(200).send('{message: "ok"}');
   });
 });
 
