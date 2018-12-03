@@ -23,6 +23,7 @@ exports.addUser = functions.https.onRequest((req, res) => {
     'first_name': first_name,
     'last_name': last_name,
     'date_of_birth': date_of_birth,
+    'punch_card': 10,
   });
 
   return cors(req, res, () => {
@@ -213,7 +214,7 @@ exports.getAllUserNames = functions.https.onRequest((req, res) => {
   allUsers.once('value')
     .then(snapshot => {
       const names = [];
-      
+
       snapshot.forEach((entry) => {
         //get user info
         const userInfo = entry.val();
@@ -254,6 +255,14 @@ exports.userCheckIn = functions.https.onRequest((req, res) => {
         });
       }
 
+      const punchCard = snapshot.val().punch_card;
+      // we need to make sure punch card is > 0
+      if(punchCard !== undefined && punchCard <= 0) {
+        return cors(req, res, () => {
+          res.status(422).send('{message: no punch card left}');
+        });
+      }
+
       // get key and timestamp
       const key = userRoot.push().key;
       const timestamp = new Date().getTime();
@@ -261,18 +270,24 @@ exports.userCheckIn = functions.https.onRequest((req, res) => {
 
       updates['check_in/' + key] = timestamp;
       updates['last_check_in'] = timestamp;
+
+      // punch card
+      if(punchCard !== undefined) {
+        updates['punch_card'] = punchCard - 1;
+      }
+
       userRoot.update(updates);
 
-      return null;
+      return cors(req, res, () => {
+          res.status(200).send('{message: ok}');
+      });
     }).catch(error => {
       return cors(req, res, () => {
         res.status(422).send('{"message": "cannot check in"}');
       });
     });
 
-  return cors(req, res, () => {
-    res.status(200).send('{"message": "ok"}');
-  });
+    return null;
 });
 
 // ============ Medical Questionnaire Functions ===============
