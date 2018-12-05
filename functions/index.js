@@ -233,11 +233,12 @@ exports.getAllUserNames = functions.https.onRequest((req, res) => {
     });
 });
 
+// process user check in
 exports.userCheckIn = functions.https.onRequest((req, res) => {
    // return if method is not post
   if(req.method !== 'POST') {
     return cors(req, res, () => {
-      res.status(422).send({'message': 'Not POST'});
+      res.status(422).send(JSON.stringify({message: 'Not POST'}));
     });
   }
 
@@ -251,7 +252,7 @@ exports.userCheckIn = functions.https.onRequest((req, res) => {
       if(!snapshot.exists()) {
         // return 422 for medical info
         return cors(req, res, () => {
-          res.status(422).send('{message: "user does not exist"}');
+          res.status(422).send(JSON.stringify({message: "user does not exist"}));
         });
       }
 
@@ -259,7 +260,7 @@ exports.userCheckIn = functions.https.onRequest((req, res) => {
       // we need to make sure punch card is > 0
       if(punchCard !== undefined && punchCard <= 0) {
         return cors(req, res, () => {
-          res.status(422).send('{message: "no punch card left"}');
+          res.status(422).send(JSON.stringify({message: 'no punch card left'}));
         });
       }
 
@@ -279,15 +280,62 @@ exports.userCheckIn = functions.https.onRequest((req, res) => {
       userRoot.update(updates);
 
       return cors(req, res, () => {
-          res.status(200).send('{message: "ok"}');
+          res.status(200).send({'message': 'ok'});
       });
     }).catch(error => {
       return cors(req, res, () => {
-        res.status(422).send('{"message": "cannot check in"}');
+        res.status(422).send({"message": "cannot check in"});
       });
     });
 
     return null;
+});
+
+// refill punch cards
+exports.refillPunchCards = functions.https.onRequest((req, res) => {
+   // return if method is not post
+  if(req.method !== 'POST') {
+    cors(req, res, () => {
+      res.status(422).send(JSON.stringify({message: 'Not POST'}));
+    });
+  }
+  const userId = req.body.user_id;
+  const refillAmount = req.body.refill_amount;
+
+  const userRoot = admin.database().ref('user').child(userId);
+
+  userRoot.once('value')
+    .then((snapshot) => {
+      //check whether user exists
+      if(!snapshot.exists()) {
+        // return 422 for medical info
+        return cors(req, res, () => {
+          res.status(422).send(JSON.stringify({message: "user does not exist"}));
+        });
+      }
+
+      const punchCard = snapshot.val().punch_card;
+
+      // get key and timestamp
+      const updates = {};
+
+      // punch card
+      if(punchCard !== undefined) {
+        updates['punch_card'] = punchCard + refillAmount;
+      } else {
+        updates['punch_card'] = refillAmount;
+      }
+
+      userRoot.update(updates);
+
+      return cors(req, res, () => {
+          res.status(200).send({'message': 'ok'});
+      });
+    }).catch(error => {
+      return cors(req, res, () => {
+        res.status(422).send({"message": "cannot refill punch cards"});
+      });
+    });
 });
 
 // ============ Medical Questionnaire Functions ===============
@@ -316,7 +364,7 @@ exports.setGeneralMedInfo = functions.https.onRequest((req, res) => {
       if(!snapshot.exists()) {
         // return 422 for medical info
         return cors(req, res, () => {
-          res.status(422).send('{"message": "user does not exist"}');
+          res.status(422).send({'message': 'user does not exist'});
         });
       }
 
@@ -336,7 +384,7 @@ exports.setGeneralMedInfo = functions.https.onRequest((req, res) => {
 
     // return success
     return cors(req, res, () => {
-      res.status(200).send('{"message": "ok"}');
+      res.status(200).send({"message": "ok"});
     });
 });
 
@@ -364,7 +412,7 @@ exports.setMedInfo = functions.https.onRequest((req, res) => {
       if(!snapshot.exists()) {
         // return 422 for medical info
         return cors(req, res, () => {
-          res.status(422).send('{message: "user does not exist"}');
+          res.status(422).send({'message': 'user does not exist'});
         });
       }
 
@@ -378,13 +426,13 @@ exports.setMedInfo = functions.https.onRequest((req, res) => {
     }).catch(error => {
       // handle other errors
       return cors(req, res, () => {
-       res.status(422).send('{message: "Cannot set medical info"}');
+       res.status(422).send({'message': 'Cannot set medical info'});
       });
     });
 
     // return success
     return cors(req, res, () => {
-      res.status(200).send('{message: "ok"}');
+      res.status(200).send({'message': 'ok'});
     });
 });
 
@@ -419,7 +467,7 @@ exports.createAlert = functions.https.onRequest((req, res) => {
   alertRoot.update(updates);
 
   return cors(req, res, () => {
-    res.status(200).send('{message: "ok"}');
+    res.status(200).send({'message': "ok"});
   });
 });
 
