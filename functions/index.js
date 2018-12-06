@@ -377,6 +377,44 @@ exports.getUserLastCheckIn = functions.https.onRequest((req, res) => {
         });
 
 });
+/*****************/
+/*  getPunchCard */
+/***************8*/
+exports.getPunchCard = functions.https.onRequest((req, res) => {
+   const userId = req.query.user_id;
+
+    const userInfo = admin.database().ref('user').child(userId);
+
+    if(userId === '/') {
+     return cors(req, res, () => {
+       res.status(422).send(JSON.stringify({message: 'User id not found'}));
+     });
+    }
+    return userInfo.once('value')
+        .then((snapshot) => {
+            if (!snapshot.exists()) {
+                return cors(req, res, () => {
+                    res.status(422).send({'message': 'User id not found'});
+                });
+            }
+            const punch_card = snapshot.val().punch_card;
+            if (punch_card !== undefined) {
+                return cors(req, res, () => {
+                    res.status(200).send(JSON.stringify(punch_card));
+                });
+            } else {
+                return cors(req, res, () => {
+                    res.status(422).send(JSON.stringify("N/A"));
+                });
+            }
+        }).catch(error => {
+            return cors(req, res, () => {
+                res.status(422).send({'message' : 'Fail to get punch card balance'});
+            });
+        });
+
+});
+
 // ============ Medical Questionnaire Functions ===============
 
 /**************************/
