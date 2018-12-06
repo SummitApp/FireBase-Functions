@@ -490,18 +490,18 @@ exports.createAlert = functions.https.onRequest((req, res) => {
 
   // get user id and val
   const name = req.body.name;
-  const dates_effective = req.body.dates_effective;
+  const start_date = req.body.start_date;
+  const end_date = req.body.end_date;
   const description= req.body.description;
-  const ttl = req.body.ttl;
 
   const alertRoot = admin.database().ref('alert');
   const alertId = alertRoot.push().key;
 
   var updates = {};
   updates[alertId + '/name'] = name;
-  updates[alertId + '/dates_effective'] = dates_effective;
+  updates[alertId + '/start_date'] = start_date;
+  updates[alertId + '/end_date'] = end_date;
   updates[alertId + '/description'] = description;
-  updates[alertId + '/ttl'] = ttl;
 
   alertRoot.update(updates);
 
