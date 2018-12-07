@@ -352,6 +352,7 @@ exports.getUserLastCheckIn = functions.https.onRequest((req, res) => {
        res.status(422).send(JSON.stringify({message: 'User id not found'}));
      });
     }
+
     return userInfo.once('value')
         .then((snapshot) => {
             if (!snapshot.exists()) {
@@ -359,11 +360,12 @@ exports.getUserLastCheckIn = functions.https.onRequest((req, res) => {
                     res.status(422).send({'message': 'User id not found'});
                 });
             }
+
             const lastCheckIn = snapshot.val().last_check_in;
             const date = new Date(lastCheckIn);
             if (lastCheckIn !== undefined) {
                 return cors(req, res, () => {
-                    res.status(200).send(JSON.stringify(date.toLocaleString()));
+                    res.status(200).send(JSON.stringify({ lastCheckIn: lastCheckIn}));
                 });
             } else {
                 return cors(req, res, () => {
