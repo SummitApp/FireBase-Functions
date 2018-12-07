@@ -579,7 +579,9 @@ exports.getActiveAlerts = functions.https.onRequest((req, res) => {
         }
       });
 
-      return res.status(200).send(JSON.stringify(activeAlerts));
+      return cors(req, res, () => {
+        res.status(200).send(JSON.stringify(activeAlerts));
+      });
     }).catch(error => {
       console.log(error);
       // return 422 for any other reason
@@ -648,7 +650,9 @@ exports.getAllAlerts = functions.https.onRequest((req, res) => {
         alerts.push(json);
       });
 
-      return res.status(200).send(JSON.stringify(alerts));
+      return cors(req, res, () => {
+        res.status(200).send(JSON.stringify(alerts));
+      });
     }).catch(error => {
       console.log(error);
       // return 422 for any other reason
