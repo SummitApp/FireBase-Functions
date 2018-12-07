@@ -548,3 +548,44 @@ exports.createAlert = functions.https.onRequest((req, res) => {
   });
 });
 
+/**************************/
+/*   getAllActiveAlerts   */
+/**************************/
+exports.getActiveAlerts = functions.https.onRequest((req, res) => {
+   // return if method is not get
+  if(req.method !== 'GET') {
+    return cors(req, res, () => {
+      res.status(422).send(JSON.stringify({message: 'Not GET'}));
+    });
+  }
+
+  const alertRoot = admin.database().ref('alert');
+  const currDate = new Date();
+  const activeAlerts = [];
+
+  alertRoot.once('value')
+    .then((snapshot) => {
+      // iterate through all the entries
+      snapshot.forEach(entry => {
+        const endDate = new Date(entry.child('end_date').val());
+
+        if(currDate <= endDate) {
+          const json = entry.toJSON();
+          json['id'] = entry.key;
+
+          activeAlerts.push(json);
+        }
+      });
+
+      return res.status(200).send(JSON.stringify(activeAlerts));
+    }).catch(error => {
+      console.log(error);
+      // return 422 for any other reason
+      return cors(req, res, () => {
+        res.status(422).send(JSON.stringify({message: 'Fail to get active alerts'}));
+      });
+    });
+
+  return null;
+});
+
