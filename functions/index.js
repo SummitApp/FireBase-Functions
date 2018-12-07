@@ -624,3 +624,36 @@ exports.deleteAlert = functions.https.onRequest((req, res) => {
   return null;
 
 });
+
+exports.getAllAlerts = functions.https.onRequest((req, res) => {
+   // return if method is not get
+  if(req.method !== 'GET') {
+    return cors(req, res, () => {
+      res.status(422).send(JSON.stringify({message: 'Not GET'}));
+    });
+  }
+
+  const alertRoot = admin.database().ref('alert');
+  const alerts = [];
+
+  alertRoot.once('value')
+    .then((snapshot) => {
+      // iterate through all the entries
+      snapshot.forEach(entry => {
+        const json = entry.toJSON();
+        json['id'] = entry.key;
+
+        alerts.push(json);
+      });
+
+      return res.status(200).send(JSON.stringify(alerts));
+    }).catch(error => {
+      console.log(error);
+      // return 422 for any other reason
+      return cors(req, res, () => {
+        res.status(422).send(JSON.stringify({message: 'Fail to get alerts'}));
+      });
+    });
+
+  return null;
+});
