@@ -571,7 +571,7 @@ exports.getActiveAlerts = functions.https.onRequest((req, res) => {
       snapshot.forEach(entry => {
         const endDate = new Date(entry.child('end_date').val());
 
-        if(currDate <= endDate) {
+        if(currDate <= endDate && startDate <= currDate) {
           const json = entry.toJSON();
           json['id'] = entry.key;
 
@@ -604,7 +604,9 @@ exports.deleteAlert = functions.https.onRequest((req, res) => {
   const alertId = req.query.alert_id;
 
   if(!alertId || alertId === '/') {
-    return res.status(442).send(JSON.stringify({message: 'cannot find alert'}));
+    return cors(req, res, () => {
+      res.status(442).send(JSON.stringify({message: 'cannot find alert'}));
+    });
   }
 
   const alertRef = admin.database().ref('alert').child(alertId);
@@ -617,7 +619,9 @@ exports.deleteAlert = functions.https.onRequest((req, res) => {
 
       alertRef.remove();
 
-      return res.status(200).send(JSON.stringify({message: 'ok'}));
+      return cors(req, res, () => {
+        res.status(200).send(JSON.stringify({message: 'ok'}));
+      });
     }).catch(error => {
       // return 422 for any other reason
       return cors(req, res, () => {
