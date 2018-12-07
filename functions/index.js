@@ -589,3 +589,38 @@ exports.getActiveAlerts = functions.https.onRequest((req, res) => {
   return null;
 });
 
+exports.deleteAlert = functions.https.onRequest((req, res) => {
+  // return if method is not get
+  if(req.method !== 'GET') {
+    return cors(req, res, () => {
+      res.status(422).send(JSON.stringify({message: 'Not GET'}));
+    });
+  }
+
+  const alertId = req.query.alert_id;
+
+  if(!alertId || alertId === '/') {
+    return res.status(442).send(JSON.stringify({message: 'cannot find alert'}));
+  }
+
+  const alertRef = admin.database().ref('alert').child(alertId);
+
+  alertRef.once('value')
+    .then((snapshot) => {
+      if(!snapshot.exists()) {
+        return res.status(442).send(JSON.stringify({message: 'cannot find alert'}));
+      }
+
+      alertRef.remove();
+
+      return res.status(200).send(JSON.stringify({message: 'ok'}));
+    }).catch(error => {
+      // return 422 for any other reason
+      return cors(req, res, () => {
+        res.status(422).send(JSON.stringify({message: 'Fail to delete alert'}));
+      });
+    });
+
+  return null;
+
+});
