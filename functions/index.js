@@ -569,6 +569,7 @@ exports.getActiveAlerts = functions.https.onRequest((req, res) => {
     .then((snapshot) => {
       // iterate through all the entries
       snapshot.forEach(entry => {
+        const startDate = new Date(entry.child('start_date').val());
         const endDate = new Date(entry.child('end_date').val());
 
         if(currDate <= endDate && startDate <= currDate) {
