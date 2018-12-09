@@ -597,17 +597,21 @@ exports.getActiveAlerts = functions.https.onRequest((req, res) => {
 exports.deleteAlert = functions.https.onRequest((req, res) => {
   // return if method is not get
   if(req.method !== 'GET') {
-    return cors(req, res, () => {
+    cors(req, res, () => {
       res.status(422).send(JSON.stringify({message: 'Not GET'}));
     });
+
+    return;
   }
 
   const alertId = req.query.alert_id;
 
   if(!alertId || alertId === '/') {
-    return cors(req, res, () => {
+    cors(req, res, () => {
       res.status(442).send(JSON.stringify({message: 'cannot find alert'}));
     });
+
+    return;
   }
 
   const alertRef = admin.database().ref('alert').child(alertId);
@@ -630,16 +634,16 @@ exports.deleteAlert = functions.https.onRequest((req, res) => {
       });
     });
 
-  return null;
-
 });
 
 exports.getAllAlerts = functions.https.onRequest((req, res) => {
    // return if method is not get
   if(req.method !== 'GET') {
-    return cors(req, res, () => {
+    cors(req, res, () => {
       res.status(422).send(JSON.stringify({message: 'Not GET'}));
     });
+
+    return;
   }
 
   const alertRoot = admin.database().ref('alert');
@@ -666,5 +670,151 @@ exports.getAllAlerts = functions.https.onRequest((req, res) => {
       });
     });
 
-  return null;
+});
+
+exports.employeeClockIn = functions.https.onRequest((req, res) => {
+   // return if method is not get
+  if(req.method !== 'POST') {
+    cors(req, res, () => {
+      res.status(422).send(JSON.stringify({message: 'Not POST'}));
+    });
+
+    return;
+  }
+
+  const uid = req.body.uid;
+  const employeeRoot = admin.database().ref('employee');
+
+  if(uid === '/') {
+    cors(req, res, () => {
+      res.status(422).send(JSON.stringify({ message: 'Fail to get employee info' }));
+    });
+  }
+
+  employeeRoot.child(uid).once('value')
+    .then((snapshot) => {
+      if(!snapshot.exists()) {
+        return cors(req, res, () => {
+          res.status(422).send(JSON.stringify({ message: 'Fail to get employee info' }));
+        });
+      }
+
+      // Clock in only when clocked out before
+      if(snapshot.child('is_clocked_in').val() === true) {
+        return cors(req, res, () => {
+          res.status(422).send(JSON.stringify({ message: 'Please clock out first' }));
+        });
+      }
+
+      const key = employeeRoot.child(uid).push().key;
+      const updates = {};
+
+      updates[uid + '/is_clocked_in'] = true;
+      updates[uid + '/clock_in/' + key] = new Date().getTime();
+      employeeRoot.update(updates);
+
+      return cors(req, res, () => {
+        res.status(200).send(JSON.stringify({ message: 'OK' }));
+      });
+    }).catch(error => {
+        return cors(req, res, () => {
+          res.status(422).send(JSON.stringify({ message: 'Fail to get employee info' }));
+        });
+    });
+
+});
+
+exports.employeeClockOut = functions.https.onRequest((req, res) => {
+   // return if method is not get
+  if(req.method !== 'POST') {
+    cors(req, res, () => {
+      res.status(422).send(JSON.stringify({message: 'Not POST'}));
+    });
+
+    return;
+  }
+
+  const uid = req.body.uid;
+  const employeeRoot = admin.database().ref('employee');
+
+  if(uid === '/') {
+    cors(req, res, () => {
+      res.status(422).send(JSON.stringify({ message: 'Fail to get employee info' }));
+    });
+  }
+
+  employeeRoot.child(uid).once('value')
+    .then((snapshot) => {
+      if(!snapshot.exists()) {
+        return cors(req, res, () => {
+          res.status(422).send(JSON.stringify({ message: 'Fail to get employee info' }));
+        });
+      }
+
+      // Clock in only when clocked out before
+      if(snapshot.child('is_clocked_in').val() === false) {
+        return cors(req, res, () => {
+          res.status(422).send(JSON.stringify({ message: 'Please clock in first' }));
+        });
+      }
+
+      const key = employeeRoot.child(uid).push().key;
+      const updates = {};
+
+      updates[uid + '/is_clocked_in'] = false;
+      updates[uid + '/clock_out/' + key] = new Date().getTime();
+      employeeRoot.update(updates);
+
+      return cors(req, res, () => {
+        res.status(200).send(JSON.stringify({ message: 'OK' }));
+      });
+    }).catch(error => {
+        return cors(req, res, () => {
+          res.status(422).send(JSON.stringify({ message: 'Fail to get employee info' }));
+        });
+    });
+
+});
+
+exports.getEmployeeClockInAndOut = functions.https.onRequest((req, res) => {
+   // return if method is not get
+  if(req.method !== 'GET') {
+    cors(req, res, () => {
+      res.status(422).send(JSON.stringify({message: 'Not GET'}));
+    });
+
+    return;
+  }
+
+  const uid = req.query.uid;
+  const employeeRoot = admin.database().ref('employee');
+
+  if(uid === '/') {
+    cors(req, res, () => {
+      res.status(422).send(JSON.stringify({ message: 'Fail to get employee info' }));
+    });
+  }
+
+  employeeRoot.child(uid).once('value')
+    .then((snapshot) => {
+      if(!snapshot.exists()) {
+        return cors(req, res, () => {
+          res.status(422).send(JSON.stringify({ message: 'Fail to get employee info' }));
+        });
+      }
+
+      const results = {};
+      results['clock_in'] = snapshot.child('clock_in').val();
+      results['clock_out'] = snapshot.child('clock_out').val();
+      results['is_clocked_in'] = snapshot.child('is_clocked_in').val();
+
+      return cors(req, res, () => {
+        res.status(200).send(JSON.stringify(results));
+      });
+    }).catch(error => {
+        return cors(req, res, () => {
+          res.status(422).send(JSON.stringify({ message: 'Fail to get employee info' }));
+        });
+    });
+
 });
