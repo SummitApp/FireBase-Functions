@@ -19,15 +19,18 @@ exports.addUser = functions.https.onRequest((req, res) => {
   const date_of_birth = req.query.dob;
 
   const userRef = admin.database().ref('user');
-  userRef.push().set({
-    'first_name': first_name,
-    'last_name': last_name,
-    'date_of_birth': date_of_birth,
-    'punch_card': 10,
-  });
+  const key = userRef.push().key;
+
+  const updates = {};
+  updates[key + '/first_name'] = first_name;
+  updates[key + '/last_name'] = last_name;
+  updates[key + '/date_of_birth'] = date_of_birth;
+  updates[key + '/punch_card'] = 10;
+
+  userRef.update(updates);
 
   return cors(req, res, () => {
-    res.status(200).send('OK');
+    res.status(200).send(JSON.stringify({message: key}));
   });
 });
 
